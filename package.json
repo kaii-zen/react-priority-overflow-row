@@ -7,7 +7,11 @@
   "author": "Kaï Bergmann",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/react-priority-overflow-row.git"
+    "url": "https://github.com/kaiizen/react-priority-overflow-row.git"
+  },
+  "homepage": "https://github.com/kaiizen/react-priority-overflow-row#readme",
+  "bugs": {
+    "url": "https://github.com/kaiizen/react-priority-overflow-row/issues"
   },
   "keywords": [
     "react",
@@ -20,6 +24,8 @@
   "sideEffects": false,
   "files": [
     "dist",
+    "docs",
+    "examples",
     "README.md",
     "LICENSE"
   ],
