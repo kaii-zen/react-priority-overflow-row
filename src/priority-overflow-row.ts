@@ -92,7 +92,7 @@ export function selectPriorityOverflowLayout({
   groupWidths,
 }: SelectPriorityOverflowLayoutOptions): PriorityOverflowLayout {
   const groupStateIndexes = groups.map(() => 0);
-  const lineBreaks = new Set<number>();
+  const wrappedGroups = new Set<number>();
 
   if (
     availableWidth <= 0 ||
@@ -103,7 +103,7 @@ export function selectPriorityOverflowLayout({
       ),
     )
   ) {
-    return layoutFromState(groupStateIndexes, lineBreaks);
+    return layoutFromState(groupStateIndexes, wrappedGroups);
   }
 
   const maxIterations =
@@ -112,7 +112,7 @@ export function selectPriorityOverflowLayout({
       Math.max(groups.length, 1);
 
   for (let iteration = 0; iteration < maxIterations; iteration += 1) {
-    const lines = linesFromBreaks(groups.length, lineBreaks);
+    const lines = linesFromWrappedGroups(groups.length, wrappedGroups);
     const overflowingLines = lines.filter(
       (line) =>
         lineWidth(line, groupStateIndexes, groupWidths, gapWidth) >
@@ -122,7 +122,7 @@ export function selectPriorityOverflowLayout({
     if (overflowingLines.length === 0) {
       return {
         groupStateIndexes,
-        lineBreaks: [...lineBreaks],
+        lineBreaks: [...wrappedGroups],
         lines,
       };
     }
@@ -132,13 +132,13 @@ export function selectPriorityOverflowLayout({
       groups,
       groupStates,
       groupStateIndexes,
-      lineBreaks,
+      wrappedGroups,
     );
 
     if (!action) {
       return {
         groupStateIndexes,
-        lineBreaks: [...lineBreaks],
+        lineBreaks: [...wrappedGroups],
         lines,
       };
     }
@@ -146,12 +146,12 @@ export function selectPriorityOverflowLayout({
     if (action.kind === 'compact') {
       groupStateIndexes[action.groupIndex] += 1;
     } else {
-      lineBreaks.add(action.groupIndex);
+      wrappedGroups.add(action.groupIndex);
       groupStateIndexes.fill(0);
     }
   }
 
-  return layoutFromState(groupStateIndexes, lineBreaks);
+  return layoutFromState(groupStateIndexes, wrappedGroups);
 }
 
 function nextPriorityOverflowAction(
@@ -159,7 +159,7 @@ function nextPriorityOverflowAction(
   groups: readonly PriorityOverflowGroupDefinition[],
   groupStates: readonly (readonly PriorityOverflowGroupState[])[],
   groupStateIndexes: readonly number[],
-  lineBreaks: ReadonlySet<number>,
+  wrappedGroups: ReadonlySet<number>,
 ): PriorityOverflowAction | undefined {
   const actions: PriorityOverflowAction[] = [];
 
@@ -179,7 +179,7 @@ function nextPriorityOverflowAction(
       if (lineIndex > 0) {
         const { wrapPriority } = groups[groupIndex];
 
-        if (wrapPriority !== undefined && !lineBreaks.has(groupIndex)) {
+        if (wrapPriority !== undefined && !wrappedGroups.has(groupIndex)) {
           actions.push({
             kind: 'wrap',
             groupIndex,
@@ -205,31 +205,30 @@ function nextPriorityOverflowAction(
 
 function layoutFromState(
   groupStateIndexes: readonly number[],
-  lineBreaks: ReadonlySet<number>,
+  wrappedGroups: ReadonlySet<number>,
 ): PriorityOverflowLayout {
   return {
     groupStateIndexes: [...groupStateIndexes],
-    lineBreaks: [...lineBreaks],
-    lines: linesFromBreaks(groupStateIndexes.length, lineBreaks),
+    lineBreaks: [...wrappedGroups],
+    lines: linesFromWrappedGroups(groupStateIndexes.length, wrappedGroups),
   };
 }
 
-function linesFromBreaks(
+function linesFromWrappedGroups(
   groupCount: number,
-  lineBreaks: ReadonlySet<number>,
+  wrappedGroups: ReadonlySet<number>,
 ): number[][] {
-  return Array.from(
+  const unwrappedLine = Array.from(
     { length: groupCount },
     (_, groupIndex) => groupIndex,
-  ).reduce<number[][]>((lines, groupIndex) => {
-    if (groupIndex === 0 || lineBreaks.has(groupIndex)) {
-      lines.push([groupIndex]);
-    } else {
-      lines[lines.length - 1].push(groupIndex);
-    }
+  ).filter((groupIndex) => !wrappedGroups.has(groupIndex));
+  const wrappedLines = Array.from(wrappedGroups)
+    .sort((left, right) => left - right)
+    .map((groupIndex) => [groupIndex]);
 
-    return lines;
-  }, []);
+  return unwrappedLine.length > 0
+    ? [unwrappedLine, ...wrappedLines]
+    : wrappedLines;
 }
 
 function lineWidth(
