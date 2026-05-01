@@ -16,12 +16,12 @@ const gifs = [
   {
     fileName: 'workspace-header-priorities.gif',
     selector: '[data-example="workspace-header"]',
-    widths: smoothWidths(760, 320, 22, 720),
+    widths: smoothWidths(760, 320, 22),
   },
   {
     fileName: 'toolbar-priorities.gif',
     selector: '[data-example="toolbar"]',
-    widths: smoothWidths(820, 320, 20, 760),
+    widths: smoothWidths(820, 320, 20),
   },
 ];
 
@@ -141,12 +141,13 @@ async function setExampleWidth(page, selector, width) {
   await page.waitForTimeout(80);
 }
 
-function smoothWidths(start, end, steps, returnTo) {
+function smoothWidths(start, end, steps) {
   const down = Array.from({ length: steps }, (_, index) =>
     Math.round(start + ((end - start) * index) / (steps - 1)),
   );
-  const up = Array.from({ length: Math.max(Math.floor(steps / 2), 2) }, (_, index) =>
-    Math.round(end + ((returnTo - end) * (index + 1)) / Math.floor(steps / 2)),
+  const upSteps = Math.max(Math.floor(steps / 2), 2);
+  const up = Array.from({ length: upSteps }, (_, index) =>
+    Math.round(end + ((start - end) * (index + 1)) / upSteps),
   );
 
   return [...down, ...up];
