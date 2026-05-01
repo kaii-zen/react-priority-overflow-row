@@ -73,7 +73,8 @@ main {
 }
 
 .workspace-header,
-.toolbar {
+.toolbar,
+.split-header {
   border-radius: 8px;
   background: #f3f6fa;
   padding: 12px;

@@ -99,3 +99,70 @@ Behavior:
 - Download compacts before the main toolbar actions become icon-only.
 - The action group wraps at priority `90`.
 - Once wrapped, it re-expands according to the new line width.
+
+## Split Right Side
+
+Use separate end-aligned groups when one right-side cluster can wrap but another
+cluster should remain on the first line.
+
+```tsx
+<PriorityOverflowRow gap={12}>
+  <PriorityOverflowRow.Group gap={10}>
+    <PriorityOverflowRow.Variant
+      modes={[
+        { value: 'full' },
+        { value: 'compact', priority: 10 },
+      ] as const}
+    >
+      {(mode) => <DocumentTrail mode={mode} />}
+    </PriorityOverflowRow.Variant>
+    <ReviewPackBadge />
+  </PriorityOverflowRow.Group>
+
+  <PriorityOverflowRow.Group align="end" gap={8} wrapPriority={90}>
+    <PriorityOverflowRow.Variant
+      modes={[
+        { value: 'comfortable' },
+        { value: 'tight', priority: 30 },
+      ] as const}
+    >
+      {(spacing) => <Collaborators spacing={spacing} />}
+    </PriorityOverflowRow.Variant>
+
+    <PriorityOverflowRow.Variant
+      modes={[
+        { value: 'full' },
+        { value: 'short', priority: 20 },
+        { value: 'icon', priority: 80 },
+      ] as const}
+    >
+      {(mode) => <StateChips mode={mode} />}
+    </PriorityOverflowRow.Variant>
+  </PriorityOverflowRow.Group>
+
+  <PriorityOverflowRow.Group align="end" gap={8}>
+    <Divider />
+    <PriorityOverflowRow.Variant
+      modes={[
+        { value: 'full' },
+        { value: 'icon', priority: 40 },
+      ] as const}
+    >
+      {(mode) => (
+        <>
+          <ShareButton mode={mode} />
+          <ExportButton mode={mode} />
+        </>
+      )}
+    </PriorityOverflowRow.Variant>
+  </PriorityOverflowRow.Group>
+</PriorityOverflowRow>
+```
+
+Behavior:
+
+- Adjacent `align="end"` groups stay clustered against the right edge.
+- The actions group remains on the first line because it has no `wrapPriority`.
+- The collaborators and state chips can wrap to their own line at priority `90`.
+- Once wrapped, the collaborators and state chips are solved independently and
+  stay end-aligned on the new line.
