@@ -22,7 +22,7 @@ function App() {
 
       <section className="demo-section">
         <h2>Workspace Header</h2>
-        <ResizableFrame>
+        <ResizableFrame example="workspace-header">
           <PriorityOverflowRow gap={12} className="workspace-header">
             <PriorityOverflowRow.Group gap={10}>
               <PriorityOverflowRow.Variant
@@ -80,7 +80,7 @@ function App() {
 
       <section className="demo-section">
         <h2>Adaptive Toolbar</h2>
-        <ResizableFrame initialWidth={760}>
+        <ResizableFrame example="toolbar" initialWidth={760}>
           <PriorityOverflowRow gap={10} className="toolbar">
             <PriorityOverflowRow.Group>
               <strong className="title">Design Review</strong>
@@ -123,13 +123,19 @@ function App() {
 
 function ResizableFrame({
   children,
+  example,
   initialWidth = 960,
 }: {
   children: ReactNode;
+  example: string;
   initialWidth?: number;
 }) {
   return (
-    <div className="resize-shell" style={{ width: initialWidth }}>
+    <div
+      className="resize-shell"
+      data-example={example}
+      style={{ width: initialWidth }}
+    >
       {children}
     </div>
   );
