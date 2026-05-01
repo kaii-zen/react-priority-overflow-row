@@ -16,12 +16,12 @@ const gifs = [
   {
     fileName: 'workspace-header-priorities.gif',
     selector: '[data-example="workspace-header"]',
-    widths: [980, 760, 610, 500, 390, 560, 880],
+    widths: smoothWidths(980, 340, 22, 900),
   },
   {
     fileName: 'toolbar-priorities.gif',
     selector: '[data-example="toolbar"]',
-    widths: [820, 680, 560, 440, 360, 610, 820],
+    widths: smoothWidths(820, 320, 20, 760),
   },
 ];
 
@@ -108,7 +108,7 @@ async function writeGifFromRenderedExample(page, { fileName, selector, widths })
 
     gif.writeFrame(indexed, width, height, {
       palette,
-      delay: index === frames.length - 1 ? 1200 : 850,
+      delay: index === frames.length - 1 ? 1000 : 90,
     });
   }
 
@@ -138,7 +138,18 @@ async function setExampleWidth(page, selector, width) {
   );
 
   // Let ResizeObserver-driven mode selection settle after the explicit resize.
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(80);
+}
+
+function smoothWidths(start, end, steps, returnTo) {
+  const down = Array.from({ length: steps }, (_, index) =>
+    Math.round(start + ((end - start) * index) / (steps - 1)),
+  );
+  const up = Array.from({ length: Math.max(Math.floor(steps / 2), 2) }, (_, index) =>
+    Math.round(end + ((returnTo - end) * (index + 1)) / Math.floor(steps / 2)),
+  );
+
+  return [...down, ...up];
 }
 
 async function pngToRawFrame(png) {

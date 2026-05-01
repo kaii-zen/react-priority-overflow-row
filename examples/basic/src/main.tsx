@@ -22,7 +22,7 @@ function App() {
 
       <section className="demo-section">
         <h2>Workspace Header</h2>
-        <ResizableFrame example="workspace-header">
+        <ResizableFrame example="workspace-header" initialWidth={980}>
           <PriorityOverflowRow gap={12} className="workspace-header">
             <PriorityOverflowRow.Group gap={10}>
               <PriorityOverflowRow.Variant
