@@ -218,13 +218,16 @@ function linesFromWrappedGroups(
   groupCount: number,
   wrappedGroups: ReadonlySet<number>,
 ): number[][] {
-  const unwrappedLine = Array.from(
-    { length: groupCount },
-    (_, groupIndex) => groupIndex,
-  ).filter((groupIndex) => !wrappedGroups.has(groupIndex));
-  const wrappedLines = Array.from(wrappedGroups)
-    .sort((left, right) => left - right)
-    .map((groupIndex) => [groupIndex]);
+  const unwrappedLine: number[] = [];
+  const wrappedLines: number[][] = [];
+
+  for (let groupIndex = 0; groupIndex < groupCount; groupIndex += 1) {
+    if (wrappedGroups.has(groupIndex)) {
+      wrappedLines.push([groupIndex]);
+    } else {
+      unwrappedLine.push(groupIndex);
+    }
+  }
 
   return unwrappedLine.length > 0
     ? [unwrappedLine, ...wrappedLines]
