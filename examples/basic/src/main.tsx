@@ -22,7 +22,7 @@ function App() {
 
       <section className="demo-section">
         <h2>Workspace Header</h2>
-        <ResizableFrame example="workspace-header" initialWidth={980}>
+        <ResizableFrame example="workspace-header" initialWidth={760}>
           <PriorityOverflowRow gap={12} className="workspace-header">
             <PriorityOverflowRow.Group gap={10}>
               <PriorityOverflowRow.Variant
@@ -36,7 +36,7 @@ function App() {
                 {(mode) => <Breadcrumbs mode={mode} />}
               </PriorityOverflowRow.Variant>
               <a className="entity-chip" href="#item">
-                Item 4821
+                Project Atlas
               </a>
             </PriorityOverflowRow.Group>
 
@@ -144,8 +144,8 @@ function ResizableFrame({
 function Breadcrumbs({ mode }: { mode: 'full' | 'compact' }) {
   const items =
     mode === 'full'
-      ? ['Workspace', 'Projects', 'Roadmap', 'Item 4821']
-      : ['W', 'P', 'R', '4821'];
+      ? ['Tasks', 'T-4821']
+      : ['T', '4821'];
 
   return (
     <nav className="breadcrumbs" aria-label="Breadcrumb">
@@ -163,7 +163,6 @@ function People({ spacing }: { spacing: 'comfortable' | 'tight' }) {
     <div className={`people people-${spacing}`}>
       <span>AM</span>
       <span>JL</span>
-      <span>RK</span>
     </div>
   );
 }
@@ -179,11 +178,8 @@ function FilterChips({ mode }: { mode: FilterMode }) {
 
   return (
     <div className="chips">
-      <Chip tone="blue" icon="PL" label={label('Planning', 'Plan')} />
-      <Chip tone="gold" icon="DS" label={label('Design', 'Dsgn')} />
-      <Chip icon="RV" label={label('Review', 'Rev')} />
-      <Chip icon="AP" label={label('Approved', 'Appr')} />
-      <Chip icon="BL" label={label('Blocked', 'Blkd')} />
+      <Chip tone="blue" icon="TD" label={label('Todo', 'Todo')} />
+      <Chip tone="gold" icon="RV" label={label('Review', 'Rev')} />
     </div>
   );
 }
@@ -209,7 +205,6 @@ function Actions({ mode }: { mode: ActionMode }) {
   return (
     <div className="actions">
       <ActionButton mode={mode} icon="O" label="Open" />
-      <ActionButton mode={mode} icon="E" label="Export" />
     </div>
   );
 }

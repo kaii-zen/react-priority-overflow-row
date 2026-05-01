@@ -16,7 +16,7 @@ const gifs = [
   {
     fileName: 'workspace-header-priorities.gif',
     selector: '[data-example="workspace-header"]',
-    widths: smoothWidths(980, 340, 22, 900),
+    widths: smoothWidths(760, 320, 22, 720),
   },
   {
     fileName: 'toolbar-priorities.gif',
