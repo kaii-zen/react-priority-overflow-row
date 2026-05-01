@@ -7,11 +7,11 @@
   "author": "Kaï Bergmann",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kaiizen/react-priority-overflow-row.git"
+    "url": "https://github.com/kaii-zen/react-priority-overflow-row.git"
   },
-  "homepage": "https://github.com/kaiizen/react-priority-overflow-row#readme",
+  "homepage": "https://github.com/kaii-zen/react-priority-overflow-row#readme",
   "bugs": {
-    "url": "https://github.com/kaiizen/react-priority-overflow-row/issues"
+    "url": "https://github.com/kaii-zen/react-priority-overflow-row/issues"
   },
   "keywords": [
     "react",
@@ -63,6 +63,7 @@
     "@vitejs/plugin-react": "^5.1.0",
     "gifenc": "^1.0.3",
     "jsdom": "^27.1.0",
+    "playwright": "^1.59.1",
     "sharp": "^0.34.5",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",

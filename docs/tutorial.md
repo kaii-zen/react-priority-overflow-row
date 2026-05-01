@@ -1,7 +1,7 @@
 # Tutorial
 
-This guide builds a responsive header whose children compact in a predictable,
-product-controlled order.
+This guide builds a responsive workspace header whose children compact in a
+predictable, product-controlled order.
 
 ## 1. Identify Groups
 
@@ -11,12 +11,12 @@ Start by grouping content that should stay together.
 <PriorityOverflowRow gap={12}>
   <PriorityOverflowRow.Group>
     <Breadcrumbs />
-    <QuoteChip />
+    <ItemBadge />
   </PriorityOverflowRow.Group>
 
   <PriorityOverflowRow.Group align="end" wrapPriority={100}>
-    <People />
-    <StatusChips />
+    <Avatars />
+    <FilterChips />
     <Actions />
   </PriorityOverflowRow.Group>
 </PriorityOverflowRow>
@@ -55,7 +55,7 @@ Lower numbers compact earlier.
     { value: 'icon', priority: 80 },
   ] as const}
 >
-  {(mode) => <StatusChips mode={mode} />}
+  {(mode) => <FilterChips mode={mode} />}
 </PriorityOverflowRow.Variant>
 ```
 
@@ -84,7 +84,7 @@ expand again if the new line has enough width.
 Your children can still be normal reusable components:
 
 ```tsx
-function StatusChips({ mode }: { mode: 'full' | 'short' | 'icon' }) {
+function FilterChips({ mode }: { mode: 'full' | 'short' | 'icon' }) {
   return <ChipList labelMode={mode} />;
 }
 ```

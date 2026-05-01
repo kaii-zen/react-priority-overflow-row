@@ -72,7 +72,7 @@ main {
   padding: 14px;
 }
 
-.job-header,
+.workspace-header,
 .toolbar {
   border-radius: 8px;
   background: #f3f6fa;
@@ -99,7 +99,7 @@ main {
   color: #697386;
 }
 
-.quote-chip {
+.entity-chip {
   display: inline-flex;
   align-items: center;
   border: 2px solid #6bb6ff;
