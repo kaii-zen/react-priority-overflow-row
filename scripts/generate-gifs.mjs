@@ -12,9 +12,9 @@ const assetsDir = path.join(root, 'docs', 'assets');
 await fs.mkdir(assetsDir, { recursive: true });
 
 await writeGif(
-  'job-header-priorities.gif',
+  'workspace-header-priorities.gif',
   [980, 760, 610, 500, 390, 560, 880],
-  renderJobHeaderFrame,
+  renderWorkspaceHeaderFrame,
 );
 await writeGif(
   'toolbar-priorities.gif',
@@ -56,21 +56,21 @@ async function rasterizeSvg(svg) {
   };
 }
 
-function renderJobHeaderFrame(width) {
-  const stages = jobHeaderStages(width);
+function renderWorkspaceHeaderFrame(width) {
+  const stages = workspaceHeaderStages(width);
   const row2Y = stages.wrapped ? 138 : 86;
   const rightX = stages.wrapped ? 62 : Math.max(62, width - stages.rightWidth - 42);
 
   return svgShell({
-    title: 'Job header priorities',
+    title: 'Workspace header priorities',
     width,
     height: 230,
     body: `
       ${container(width, stages.wrapped ? 178 : 126)}
       ${breadcrumbs(stages.breadcrumbs, 62, 86)}
-      ${quoteChip(356, 86)}
+      ${entityChip(356, 86)}
       ${people(stages.people, rightX, row2Y)}
-      ${jobChips(stages.chips, rightX + stages.peopleWidth + 14, row2Y)}
+      ${filterChips(stages.chips, rightX + stages.peopleWidth + 14, row2Y)}
       ${divider(rightX + stages.peopleWidth + stages.chipsWidth + 28, row2Y - 17)}
       ${actions(stages.actions, rightX + stages.peopleWidth + stages.chipsWidth + 44, row2Y)}
       ${caption(stages.caption, 62, stages.wrapped ? 202 : 152)}
@@ -89,14 +89,14 @@ function renderToolbarFrame(width) {
     height: 222,
     body: `
       ${container(width, state.wrapped ? 170 : 120)}
-      ${text('Quote 173603', 62, 91, 26, '#20242a', 800)}
+      ${text('Design Review', 62, 91, 26, '#20242a', 800)}
       ${toolbarButtons(state.mode, rightX, row2Y)}
       ${caption(state.caption, 62, state.wrapped ? 194 : 144)}
     `,
   });
 }
 
-function jobHeaderStages(width) {
+function workspaceHeaderStages(width) {
   if (width >= 820) {
     return {
       breadcrumbs: 'full',
@@ -222,18 +222,18 @@ function container(width, height) {
 
 function breadcrumbs(mode, x, y) {
   const label =
-    mode === 'full' ? 'Home / Production / Jobs / 67194-0' : 'H / P / J / 67194-0';
+    mode === 'full' ? 'Workspace / Projects / Roadmap / Item 4821' : 'W / P / R / 4821';
 
   return pill(label, x, y - 24, mode === 'full' ? 274 : 170, '#e0f2fe', '#1478d4');
 }
 
-function quoteChip(x, y) {
-  return pill('173603', x, y - 24, 88, '#ffffff', '#1781e9', '#6bb6ff');
+function entityChip(x, y) {
+  return pill('Item 4821', x, y - 24, 108, '#ffffff', '#1781e9', '#6bb6ff');
 }
 
 function people(spacing, x, y) {
   const overlap = spacing === 'tight' ? 20 : 10;
-  return ['EC', 'SS', 'MB']
+  return ['AM', 'JL', 'RK']
     .map((label, index) => {
       const cx = x + index * (36 - overlap) + 18;
       const colors = ['#a76ea1', '#9fe95b', '#6875f5'];
@@ -245,27 +245,27 @@ function people(spacing, x, y) {
     .join('');
 }
 
-function jobChips(mode, x, y) {
+function filterChips(mode, x, y) {
   const labels =
     mode === 'full'
       ? [
-          ['Packages', 116, '#11aee7'],
-          ['Welding', 108, '#ffc928'],
-          ['Picking', 96, '#dfe3e9'],
-          ['Production', 122, '#dfe3e9'],
+          ['Planning', 116, '#11aee7'],
+          ['Design', 108, '#ffc928'],
+          ['Review', 96, '#dfe3e9'],
+          ['Approved', 122, '#dfe3e9'],
         ]
       : mode === 'short'
         ? [
-            ['Pkg', 74, '#11aee7'],
-            ['Weld', 82, '#ffc928'],
-            ['Pick', 76, '#dfe3e9'],
-            ['Prod', 78, '#dfe3e9'],
+            ['Plan', 74, '#11aee7'],
+            ['Dsgn', 82, '#ffc928'],
+            ['Rev', 76, '#dfe3e9'],
+            ['Appr', 78, '#dfe3e9'],
           ]
         : [
-            ['PK', 48, '#11aee7'],
-            ['WD', 48, '#ffc928'],
-            ['PI', 48, '#dfe3e9'],
-            ['PR', 48, '#dfe3e9'],
+            ['PL', 48, '#11aee7'],
+            ['DS', 48, '#ffc928'],
+            ['RV', 48, '#dfe3e9'],
+            ['AP', 48, '#dfe3e9'],
           ];
   let cursor = x;
   return labels
@@ -278,7 +278,7 @@ function jobChips(mode, x, y) {
 }
 
 function actions(mode, x, y) {
-  const labels = mode === 'full' ? [['BOM', 76], ['Save', 86]] : [['B', 42], ['S', 42]];
+  const labels = mode === 'full' ? [['Open', 76], ['Export', 86]] : [['O', 42], ['E', 42]];
   let cursor = x;
   return labels
     .map(([label, width], index) => {
@@ -296,22 +296,22 @@ function toolbarButtons(mode, x, y) {
     mode === 'full'
       ? [
           ['Refresh', 104],
-          ['Print preview', 156],
-          ['Approval drawing', 190],
-          ['Save', 88],
+          ['Comments', 156],
+          ['Share', 190],
+          ['Export', 88],
         ]
       : mode === 'short'
         ? [
             ['R', 48],
-            ['P', 48],
-            ['A', 48],
-            ['Save', 88],
+            ['C', 48],
+            ['S', 48],
+            ['Export', 88],
           ]
         : [
             ['R', 48],
-            ['P', 48],
-            ['A', 48],
+            ['C', 48],
             ['S', 48],
+            ['D', 48],
           ];
   let cursor = x;
   return labels

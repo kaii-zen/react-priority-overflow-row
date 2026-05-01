@@ -1,6 +1,6 @@
 # Examples
 
-## Header With Breadcrumbs And Actions
+## Workspace Header
 
 ```tsx
 <PriorityOverflowRow gap={12}>
@@ -13,7 +13,7 @@
     >
       {(mode) => <Breadcrumbs mode={mode} />}
     </PriorityOverflowRow.Variant>
-    <QuoteChip />
+    <ItemBadge />
   </PriorityOverflowRow.Group>
 
   <PriorityOverflowRow.Group align="end" gap={8} wrapPriority={100}>
@@ -23,7 +23,7 @@
         { value: 'tight', priority: 30 },
       ] as const}
     >
-      {(spacing) => <People spacing={spacing} />}
+      {(spacing) => <Avatars spacing={spacing} />}
     </PriorityOverflowRow.Variant>
 
     <PriorityOverflowRow.Variant
@@ -33,7 +33,7 @@
         { value: 'icon', priority: 80 },
       ] as const}
     >
-      {(mode) => <StatusChips mode={mode} />}
+      {(mode) => <FilterChips mode={mode} />}
     </PriorityOverflowRow.Variant>
 
     <Divider />
@@ -53,16 +53,16 @@
 Behavior:
 
 - Breadcrumbs compact first.
-- Status chips shorten before people spacing tightens.
-- Actions become icons before status chips become icon-only.
+- Filters shorten before avatar spacing tightens.
+- Actions become icons before filters become icon-only.
 - The right group wraps after cheaper compactions are exhausted.
 
-## Toolbar
+## Adaptive Toolbar
 
 ```tsx
 <PriorityOverflowRow gap={10}>
   <PriorityOverflowRow.Group>
-    <strong>Quote 173603</strong>
+    <strong>Design Review</strong>
   </PriorityOverflowRow.Group>
 
   <PriorityOverflowRow.Group align="end" gap={8} wrapPriority={90}>
@@ -76,8 +76,8 @@ Behavior:
       {(mode) => (
         <>
           <ToolbarButton mode={mode} icon={<Refresh />} label="Refresh" />
-          <ToolbarButton mode={mode} icon={<Print />} label="Print preview" />
-          <ToolbarButton mode={mode} icon={<Cube />} label="Approval drawing" />
+          <ToolbarButton mode={mode} icon={<Comment />} label="Comments" />
+          <ToolbarButton mode={mode} icon={<Share />} label="Share" />
         </>
       )}
     </PriorityOverflowRow.Variant>
@@ -88,7 +88,7 @@ Behavior:
         { value: 'icon', priority: 35 },
       ] as const}
     >
-      {(mode) => <SaveButton mode={mode} />}
+      {(mode) => <DownloadButton mode={mode} />}
     </PriorityOverflowRow.Variant>
   </PriorityOverflowRow.Group>
 </PriorityOverflowRow>
@@ -96,6 +96,6 @@ Behavior:
 
 Behavior:
 
-- Save compacts before the main toolbar actions become icon-only.
+- Download compacts before the main toolbar actions become icon-only.
 - The action group wraps at priority `90`.
 - Once wrapped, it re-expands according to the new line width.

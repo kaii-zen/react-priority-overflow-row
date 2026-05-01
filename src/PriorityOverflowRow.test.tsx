@@ -31,7 +31,7 @@ function TestRow() {
         >
           {(mode) => <span data-slot="left">left-{mode}</span>}
         </PriorityOverflowRow.Variant>
-        <span>quote</span>
+        <span>badge</span>
       </PriorityOverflowRow.Group>
       <PriorityOverflowRow.Group align="end" wrapPriority={100}>
         <PriorityOverflowRow.Variant
@@ -74,8 +74,8 @@ describe('PriorityOverflowRow', () => {
       function getBoundingClientRect() {
         const element = this as HTMLElement;
         const widthByText: Record<string, number> = {
-          'left-fullquote': 300,
-          'left-compactquote': 180,
+          'left-fullbadge': 300,
+          'left-compactbadge': 180,
           'people-mediumchips-fullactions-full': 420,
           'people-mediumchips-shortactions-full': 360,
           'people-smallchips-shortactions-full': 340,
@@ -114,7 +114,7 @@ describe('PriorityOverflowRow', () => {
     await waitFor(() => {
       expect(visibleSlot('left')).toHaveTextContent('left-full');
       expect(visibleSlot('chips')).toHaveTextContent('chips-full');
-      expect(screen.getAllByText('quote').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('badge').length).toBeGreaterThan(0);
     });
   });
 

@@ -4,7 +4,7 @@ import { PriorityOverflowRow } from '../../../src';
 import type { ReactNode } from 'react';
 import './styles.css';
 
-type ChipMode = 'full' | 'short' | 'icon';
+type FilterMode = 'full' | 'short' | 'icon';
 type ActionMode = 'full' | 'icon';
 
 function App() {
@@ -21,9 +21,9 @@ function App() {
       </header>
 
       <section className="demo-section">
-        <h2>Job Header Pattern</h2>
+        <h2>Workspace Header</h2>
         <ResizableFrame>
-          <PriorityOverflowRow gap={12} className="job-header">
+          <PriorityOverflowRow gap={12} className="workspace-header">
             <PriorityOverflowRow.Group gap={10}>
               <PriorityOverflowRow.Variant
                 modes={
@@ -35,8 +35,8 @@ function App() {
               >
                 {(mode) => <Breadcrumbs mode={mode} />}
               </PriorityOverflowRow.Variant>
-              <a className="quote-chip" href="#quote">
-                173603
+              <a className="entity-chip" href="#item">
+                Item 4821
               </a>
             </PriorityOverflowRow.Group>
 
@@ -60,7 +60,7 @@ function App() {
                   ] as const
                 }
               >
-                {(mode) => <JobChips mode={mode} />}
+                {(mode) => <FilterChips mode={mode} />}
               </PriorityOverflowRow.Variant>
               <div className="divider" />
               <PriorityOverflowRow.Variant
@@ -79,11 +79,11 @@ function App() {
       </section>
 
       <section className="demo-section">
-        <h2>Toolbar Pattern</h2>
+        <h2>Adaptive Toolbar</h2>
         <ResizableFrame initialWidth={760}>
           <PriorityOverflowRow gap={10} className="toolbar">
             <PriorityOverflowRow.Group>
-              <strong className="title">Quote 173603</strong>
+              <strong className="title">Design Review</strong>
             </PriorityOverflowRow.Group>
             <PriorityOverflowRow.Group align="end" gap={8} wrapPriority={90}>
               <PriorityOverflowRow.Variant
@@ -98,8 +98,8 @@ function App() {
                 {(mode) => (
                   <>
                     <ToolButton mode={mode} icon="R" label="Refresh" />
-                    <ToolButton mode={mode} icon="P" label="Print preview" />
-                    <ToolButton mode={mode} icon="A" label="Approval drawing" />
+                    <ToolButton mode={mode} icon="C" label="Comments" />
+                    <ToolButton mode={mode} icon="S" label="Share" />
                   </>
                 )}
               </PriorityOverflowRow.Variant>
@@ -111,7 +111,7 @@ function App() {
                   ] as const
                 }
               >
-                {(mode) => <ToolButton mode={mode} icon="S" label="Save" />}
+                {(mode) => <ToolButton mode={mode} icon="D" label="Download" />}
               </PriorityOverflowRow.Variant>
             </PriorityOverflowRow.Group>
           </PriorityOverflowRow>
@@ -138,8 +138,8 @@ function ResizableFrame({
 function Breadcrumbs({ mode }: { mode: 'full' | 'compact' }) {
   const items =
     mode === 'full'
-      ? ['Home', 'Production', 'Jobs', '67194-0']
-      : ['H', 'P', 'J', '67194-0'];
+      ? ['Workspace', 'Projects', 'Roadmap', 'Item 4821']
+      : ['W', 'P', 'R', '4821'];
 
   return (
     <nav className="breadcrumbs" aria-label="Breadcrumb">
@@ -155,14 +155,14 @@ function Breadcrumbs({ mode }: { mode: 'full' | 'compact' }) {
 function People({ spacing }: { spacing: 'comfortable' | 'tight' }) {
   return (
     <div className={`people people-${spacing}`}>
-      <span>EC</span>
-      <span>SS</span>
-      <span>MB</span>
+      <span>AM</span>
+      <span>JL</span>
+      <span>RK</span>
     </div>
   );
 }
 
-function JobChips({ mode }: { mode: ChipMode }) {
+function FilterChips({ mode }: { mode: FilterMode }) {
   const label = (full: string, short: string) => {
     if (mode === 'icon') {
       return null;
@@ -173,11 +173,11 @@ function JobChips({ mode }: { mode: ChipMode }) {
 
   return (
     <div className="chips">
-      <Chip tone="blue" icon="PK" label={label('Packages', 'Pkg')} />
-      <Chip tone="gold" icon="WD" label={label('Welding', 'Weld')} />
-      <Chip icon="PI" label={label('Picking', 'Pick')} />
-      <Chip icon="PR" label={label('Production', 'Prod')} />
-      <Chip icon="BO" label={label('Backorder', 'B/O')} />
+      <Chip tone="blue" icon="PL" label={label('Planning', 'Plan')} />
+      <Chip tone="gold" icon="DS" label={label('Design', 'Dsgn')} />
+      <Chip icon="RV" label={label('Review', 'Rev')} />
+      <Chip icon="AP" label={label('Approved', 'Appr')} />
+      <Chip icon="BL" label={label('Blocked', 'Blkd')} />
     </div>
   );
 }
@@ -202,8 +202,8 @@ function Chip({
 function Actions({ mode }: { mode: ActionMode }) {
   return (
     <div className="actions">
-      <ActionButton mode={mode} icon="B" label="BOM" />
-      <ActionButton mode={mode} icon="S" label="Save" disabled />
+      <ActionButton mode={mode} icon="O" label="Open" />
+      <ActionButton mode={mode} icon="E" label="Export" />
     </div>
   );
 }
@@ -212,15 +212,13 @@ function ActionButton({
   mode,
   icon,
   label,
-  disabled = false,
 }: {
   mode: ActionMode;
   icon: string;
   label: string;
-  disabled?: boolean;
 }) {
   return (
-    <button className="action-button" disabled={disabled}>
+    <button className="action-button">
       <span>{icon}</span>
       {mode === 'full' ? label : null}
     </button>

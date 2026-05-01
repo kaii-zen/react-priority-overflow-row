@@ -3,15 +3,15 @@
 A measured React layout primitive for rows where siblings have their own
 responsive representations and must coordinate before wrapping.
 
-It is useful for headers, toolbars, and dense operational UI where each child
-can become smaller in a different way:
+It is useful for headers, toolbars, filter bars, and dense application UI where
+each child can become smaller in a different way:
 
 - breadcrumbs can switch from full text to compact text;
-- chips can switch from full labels to short labels to icon-only;
+- filters can switch from full labels to short labels to icon-only;
 - action buttons can switch from button to icon button;
 - one group can move to its own line after lower-cost compaction is exhausted.
 
-![Job header priority overflow demo](docs/assets/job-header-priorities.gif)
+![Workspace header priority overflow demo](docs/assets/workspace-header-priorities.gif)
 
 ## Install
 
@@ -42,7 +42,7 @@ export function Header() {
         >
           {(mode) => <Breadcrumbs mode={mode} />}
         </PriorityOverflowRow.Variant>
-        <QuoteChip />
+        <ItemBadge />
       </PriorityOverflowRow.Group>
 
       <PriorityOverflowRow.Group align="end" wrapPriority={100}>
@@ -53,7 +53,7 @@ export function Header() {
             { value: 'icon', priority: 80 },
           ] as const}
         >
-          {(mode) => <JobChips mode={mode} />}
+          {(mode) => <FilterChips mode={mode} />}
         </PriorityOverflowRow.Variant>
 
         <PriorityOverflowRow.Variant
@@ -134,12 +134,12 @@ Groups should match visual units that should stay together.
 ```tsx
 <PriorityOverflowRow.Group>
   <Breadcrumbs />
-  <QuoteChip />
+  <ItemBadge />
 </PriorityOverflowRow.Group>
 
 <PriorityOverflowRow.Group align="end" wrapPriority={100}>
-  <People />
-  <StatusChips />
+  <Avatars />
+  <FilterChips />
   <Actions />
 </PriorityOverflowRow.Group>
 ```
@@ -157,7 +157,7 @@ multiple representations.
     { value: 'icon', priority: 80 },
   ] as const}
 >
-  {(mode) => <StatusChips mode={mode} />}
+  {(mode) => <FilterChips mode={mode} />}
 </PriorityOverflowRow.Variant>
 ```
 
@@ -166,13 +166,13 @@ multiple representations.
 The numbers do not need to be contiguous. Leave room between them.
 
 ```tsx
-// Breadcrumbs compact before status chips lose labels.
+// Breadcrumbs compact before filters lose labels.
 { value: 'compact', priority: 10 }
 
-// Status chips shorten before action buttons become icons.
+// Filters shorten before action buttons become icons.
 { value: 'short', priority: 20 }
 
-// Actions become icons before status chips become icon-only.
+// Actions become icons before filters become icon-only.
 { value: 'icon', priority: 40 }
 ```
 
