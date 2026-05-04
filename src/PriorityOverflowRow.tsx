@@ -281,11 +281,16 @@ function PriorityOverflowRowRoot({
     >
       {layout.lines.map((line) => (
         <div key={line.join('-')} style={{ ...lineStyle, gap: rowGap }}>
-          {line.map((groupIndex) => {
+          {line.map((groupIndex, lineGroupIndex) => {
             const group = groups[groupIndex];
             const groupState =
               groupStates[groupIndex][layout.groupStateIndexes[groupIndex]];
             const groupGap = resolvePriorityOverflowGap(group.gap ?? gap);
+            const groupAlign = group.align ?? 'start';
+            const previousGroup = groups[line[lineGroupIndex - 1]];
+            const previousGroupAlign = previousGroup?.align ?? 'start';
+            const startsEndAlignedCluster =
+              groupAlign === 'end' && previousGroupAlign !== 'end';
 
             return (
               <div
@@ -293,7 +298,9 @@ function PriorityOverflowRowRoot({
                 style={{
                   ...groupStyle,
                   gap: groupGap,
-                  marginInlineStart: group.align === 'end' ? 'auto' : undefined,
+                  marginInlineStart: startsEndAlignedCluster
+                    ? 'auto'
+                    : undefined,
                 }}
               >
                 {renderGroupChildren(group, groupState.modes)}
@@ -475,6 +482,7 @@ const lineStyle = {
   display: 'flex',
   alignItems: 'center',
   flexWrap: 'nowrap',
+  width: '100%',
   minWidth: 0,
   maxWidth: '100%',
 } satisfies CSSProperties;

@@ -62,6 +62,49 @@ function TestRow() {
   );
 }
 
+function SplitRightRow() {
+  return (
+    <PriorityOverflowRow gap="12px" className="priority-row">
+      <PriorityOverflowRow.Group>
+        <PriorityOverflowRow.Variant
+          modes={
+            [{ value: 'full' }, { value: 'compact', priority: 10 }] as const
+          }
+        >
+          {(mode) => <span data-slot="left">left-{mode}</span>}
+        </PriorityOverflowRow.Variant>
+      </PriorityOverflowRow.Group>
+      <PriorityOverflowRow.Group align="end" wrapPriority={100}>
+        <PriorityOverflowRow.Variant
+          modes={
+            [{ value: 'medium' }, { value: 'small', priority: 30 }] as const
+          }
+        >
+          {(mode) => <span data-slot="people">people-{mode}</span>}
+        </PriorityOverflowRow.Variant>
+        <PriorityOverflowRow.Variant
+          modes={
+            [
+              { value: 'full' },
+              { value: 'short', priority: 20 },
+              { value: 'icon', priority: 80 },
+            ] as const
+          }
+        >
+          {(mode) => <span data-slot="chips">chips-{mode}</span>}
+        </PriorityOverflowRow.Variant>
+      </PriorityOverflowRow.Group>
+      <PriorityOverflowRow.Group align="end">
+        <PriorityOverflowRow.Variant
+          modes={[{ value: 'full' }, { value: 'icon', priority: 40 }] as const}
+        >
+          {(mode) => <span data-slot="actions">actions-{mode}</span>}
+        </PriorityOverflowRow.Variant>
+      </PriorityOverflowRow.Group>
+    </PriorityOverflowRow>
+  );
+}
+
 describe('PriorityOverflowRow', () => {
   let availableWidth = 940;
   let originalGetBoundingClientRect: typeof HTMLElement.prototype.getBoundingClientRect;
@@ -74,8 +117,16 @@ describe('PriorityOverflowRow', () => {
       function getBoundingClientRect() {
         const element = this as HTMLElement;
         const widthByText: Record<string, number> = {
+          'left-full': 300,
+          'left-compact': 180,
           'left-fullbadge': 300,
           'left-compactbadge': 180,
+          'people-mediumchips-full': 420,
+          'people-mediumchips-short': 360,
+          'people-smallchips-short': 300,
+          'people-smallchips-icon': 260,
+          'actions-full': 160,
+          'actions-icon': 80,
           'people-mediumchips-fullactions-full': 420,
           'people-mediumchips-shortactions-full': 360,
           'people-smallchips-shortactions-full': 340,
@@ -149,6 +200,38 @@ describe('PriorityOverflowRow', () => {
       expect(visibleSlot('people')).toHaveTextContent('people-medium');
       expect(visibleSlot('chips')).toHaveTextContent('chips-full');
       expect(visibleSlot('actions')).toHaveTextContent('actions-full');
+    });
+  });
+
+  it('treats adjacent end-aligned groups as one alignment cluster', async () => {
+    availableWidth = 900;
+    render(<SplitRightRow />);
+
+    await waitFor(() => {
+      const peopleGroup = visibleSlot('people')?.parentElement;
+      const actionsGroup = visibleSlot('actions')?.parentElement;
+
+      expect(peopleGroup?.parentElement).toBe(actionsGroup?.parentElement);
+      expect(peopleGroup?.style.marginInlineStart).toBe('auto');
+      expect(actionsGroup?.style.marginInlineStart).toBe('');
+    });
+  });
+
+  it('right-aligns an isolated wrapped end-aligned group', async () => {
+    availableWidth = 500;
+    render(<SplitRightRow />);
+
+    await waitFor(() => {
+      const leftLine = visibleSlot('left')?.parentElement?.parentElement;
+      const peopleLine = visibleSlot('people')?.parentElement?.parentElement;
+      const actionsLine = visibleSlot('actions')?.parentElement?.parentElement;
+
+      expect(actionsLine).toBe(leftLine);
+      expect(peopleLine).not.toBe(leftLine);
+      expect(visibleSlot('people')?.parentElement?.style.marginInlineStart).toBe(
+        'auto',
+      );
+      expect(peopleLine?.style.width).toBe('100%');
     });
   });
 });

@@ -175,4 +175,115 @@ describe('selectPriorityOverflowLayout', () => {
     expect(twoGroupLayout.lineBreaks).toEqual([1]);
     expect(twoGroupLayout.groupStateIndexes).toEqual([0, 3]);
   });
+
+  it('isolates a wrapped middle group instead of pulling later groups with it', () => {
+    const splitRightGroups = [
+      {
+        variants: [
+          {
+            id: 'breadcrumbs',
+            modes: [{ value: 'full' }, { value: 'compact', priority: 10 }],
+          },
+        ],
+      },
+      {
+        wrapPriority: 100,
+        variants: [
+          {
+            id: 'people',
+            modes: [{ value: 'medium' }, { value: 'small', priority: 30 }],
+          },
+          {
+            id: 'chips',
+            modes: [
+              { value: 'full' },
+              { value: 'short', priority: 20 },
+              { value: 'icon', priority: 80 },
+            ],
+          },
+        ],
+      },
+      {
+        variants: [
+          {
+            id: 'actions',
+            modes: [{ value: 'full' }, { value: 'icon', priority: 40 }],
+          },
+        ],
+      },
+    ] as const satisfies readonly PriorityOverflowGroupDefinition[];
+    const splitRightGroupStates = splitRightGroups.map((group) =>
+      buildPriorityOverflowGroupStates(group),
+    );
+    const splitRightLayout = selectPriorityOverflowLayout({
+      availableWidth: 500,
+      gapWidth: 12,
+      groups: splitRightGroups,
+      groupStates: splitRightGroupStates,
+      groupWidths: [
+        [300, 180],
+        [420, 360, 300, 260],
+        [160, 80],
+      ],
+    });
+
+    expect(splitRightLayout.lineBreaks).toEqual([1]);
+    expect(splitRightLayout.lines).toEqual([[0, 2], [1]]);
+    expect(splitRightLayout.groupStateIndexes).toEqual([0, 0, 0]);
+  });
+
+  it('re-solves isolated wrapped groups and remaining row independently', () => {
+    const splitRightGroups = [
+      {
+        variants: [
+          {
+            id: 'breadcrumbs',
+            modes: [{ value: 'full' }, { value: 'compact', priority: 10 }],
+          },
+        ],
+      },
+      {
+        wrapPriority: 100,
+        variants: [
+          {
+            id: 'people',
+            modes: [{ value: 'medium' }, { value: 'small', priority: 30 }],
+          },
+          {
+            id: 'chips',
+            modes: [
+              { value: 'full' },
+              { value: 'short', priority: 20 },
+              { value: 'icon', priority: 80 },
+            ],
+          },
+        ],
+      },
+      {
+        variants: [
+          {
+            id: 'actions',
+            modes: [{ value: 'full' }, { value: 'icon', priority: 40 }],
+          },
+        ],
+      },
+    ] as const satisfies readonly PriorityOverflowGroupDefinition[];
+    const splitRightGroupStates = splitRightGroups.map((group) =>
+      buildPriorityOverflowGroupStates(group),
+    );
+    const splitRightLayout = selectPriorityOverflowLayout({
+      availableWidth: 380,
+      gapWidth: 12,
+      groups: splitRightGroups,
+      groupStates: splitRightGroupStates,
+      groupWidths: [
+        [300, 180],
+        [420, 360, 300, 260],
+        [160, 80],
+      ],
+    });
+
+    expect(splitRightLayout.lines).toEqual([[0, 2], [1]]);
+    expect(splitRightLayout.groupStateIndexes).toEqual([1, 1, 0]);
+  });
 });

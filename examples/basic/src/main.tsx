@@ -117,6 +117,72 @@ function App() {
           </PriorityOverflowRow>
         </ResizableFrame>
       </section>
+
+      <section className="demo-section">
+        <h2>Split Right Side</h2>
+        <ResizableFrame example="split-right-side" initialWidth={760}>
+          <PriorityOverflowRow gap={12} className="split-header">
+            <PriorityOverflowRow.Group gap={10}>
+              <PriorityOverflowRow.Variant
+                modes={
+                  [
+                    { value: 'full' },
+                    { value: 'compact', priority: 10 },
+                  ] as const
+                }
+              >
+                {(mode) => <DocumentTrail mode={mode} />}
+              </PriorityOverflowRow.Variant>
+              <a className="entity-chip" href="#review">
+                Review pack
+              </a>
+            </PriorityOverflowRow.Group>
+
+            <PriorityOverflowRow.Group align="end" gap={8} wrapPriority={90}>
+              <PriorityOverflowRow.Variant
+                modes={
+                  [
+                    { value: 'comfortable' },
+                    { value: 'tight', priority: 30 },
+                  ] as const
+                }
+              >
+                {(spacing) => <People spacing={spacing} />}
+              </PriorityOverflowRow.Variant>
+              <PriorityOverflowRow.Variant
+                modes={
+                  [
+                    { value: 'full' },
+                    { value: 'short', priority: 20 },
+                    { value: 'icon', priority: 80 },
+                  ] as const
+                }
+              >
+                {(mode) => <StateChips mode={mode} />}
+              </PriorityOverflowRow.Variant>
+            </PriorityOverflowRow.Group>
+
+            <PriorityOverflowRow.Group align="end" gap={8}>
+              <div className="divider" />
+              <PriorityOverflowRow.Variant
+                modes={
+                  [
+                    { value: 'full' },
+                    { value: 'icon', priority: 40 },
+                  ] as const
+                }
+              >
+                {(mode) => (
+                  <div className="actions">
+                    <ActionButton mode={mode} icon="S" label="Share" />
+                    <ActionButton mode={mode} icon="E" label="Export" />
+                  </div>
+                )}
+              </PriorityOverflowRow.Variant>
+            </PriorityOverflowRow.Group>
+          </PriorityOverflowRow>
+        </ResizableFrame>
+      </section>
     </main>
   );
 }
@@ -158,6 +224,23 @@ function Breadcrumbs({ mode }: { mode: 'full' | 'compact' }) {
   );
 }
 
+function DocumentTrail({ mode }: { mode: 'full' | 'compact' }) {
+  const items =
+    mode === 'full'
+      ? ['Library', 'Design Systems', 'Buttons']
+      : ['L', 'DS', 'Buttons'];
+
+  return (
+    <nav className="breadcrumbs" aria-label="Document trail">
+      {items.map((item, index) => (
+        <span key={item} className={index === items.length - 1 ? 'muted' : ''}>
+          {item}
+        </span>
+      ))}
+    </nav>
+  );
+}
+
 function People({ spacing }: { spacing: 'comfortable' | 'tight' }) {
   return (
     <div className={`people people-${spacing}`}>
@@ -180,6 +263,24 @@ function FilterChips({ mode }: { mode: FilterMode }) {
     <div className="chips">
       <Chip tone="blue" icon="TD" label={label('Todo', 'Todo')} />
       <Chip tone="gold" icon="RV" label={label('Review', 'Rev')} />
+    </div>
+  );
+}
+
+function StateChips({ mode }: { mode: FilterMode }) {
+  const label = (full: string, short: string) => {
+    if (mode === 'icon') {
+      return null;
+    }
+
+    return mode === 'short' ? short : full;
+  };
+
+  return (
+    <div className="chips">
+      <Chip tone="blue" icon="ST" label={label('Staged', 'Stg')} />
+      <Chip tone="gold" icon="QA" label={label('Quality Check', 'QA')} />
+      <Chip icon="AP" label={label('Approved', 'Appr')} />
     </div>
   );
 }
