@@ -166,3 +166,46 @@ Behavior:
 - The collaborators and state chips can wrap to their own line at priority `90`.
 - Once wrapped, the collaborators and state chips are solved independently and
   stay end-aligned on the new line.
+
+## Packed Info Bar
+
+Use `layout="packed"` when every group should keep source order but later groups
+may fill leftover space on wrapped lines.
+
+```tsx
+<PriorityOverflowRow layout="packed" gap={12}>
+  <PriorityOverflowRow.Group>
+    <DateField label="Start" />
+  </PriorityOverflowRow.Group>
+  <PriorityOverflowRow.Group>
+    <DateField label="Delivery" />
+  </PriorityOverflowRow.Group>
+  <PriorityOverflowRow.Group>
+    <DrawingStatus />
+  </PriorityOverflowRow.Group>
+  <PriorityOverflowRow.Group align="end">
+    <PriorityOverflowRow.Variant
+      modes={[
+        { value: 'full' },
+        { value: 'short', priority: 20 },
+        { value: 'icon', priority: 80 },
+      ] as const}
+    >
+      {(mode) => (
+        <>
+          <FormButton mode={mode} icon={<Clipboard />} label="Inspection" />
+          <FormButton mode={mode} icon={<Gauge />} label="Test Report" />
+          <FormButton mode={mode} icon={<Wrench />} label="Service" />
+        </>
+      )}
+    </PriorityOverflowRow.Variant>
+  </PriorityOverflowRow.Group>
+</PriorityOverflowRow>
+```
+
+Behavior:
+
+- Date and drawing groups wrap individually.
+- The form buttons compact before their group wraps when that is cheaper.
+- Once a new line exists, later groups are packed into it when they fit.
+- The end-aligned forms group stays pinned to the right side of its line.

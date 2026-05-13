@@ -74,7 +74,8 @@ main {
 
 .workspace-header,
 .toolbar,
-.split-header {
+.split-header,
+.packed-schedule-bar {
   border-radius: 8px;
   background: #f3f6fa;
   padding: 12px;
@@ -226,4 +227,95 @@ main {
 
 .tool-button {
   background: #475569;
+}
+
+.packed-schedule-bar {
+  align-items: flex-start;
+}
+
+.date-field {
+  display: grid;
+  gap: 3px;
+  width: 180px;
+  color: #697386;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.date-field strong {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 34px;
+  border-bottom: 1px solid #9aa4b2;
+  color: #20242a;
+  font-size: 16px;
+}
+
+.resource-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 54px;
+  color: #1781e9;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.workflow-buttons {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.workflow-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  border-radius: 6px;
+  background: #238be6;
+  color: white;
+  font-weight: 800;
+  padding: 0 12px;
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgb(15 23 42 / 20%);
+}
+
+.workflow-button-icon {
+  width: 42px;
+  padding: 0;
+  border-radius: 999px;
+}
+
+.workflow-button-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: white;
+  color: #238be6;
+  font-size: 12px;
+}
+
+.workflow-button-badge {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #1168c3;
+  color: white;
+  font-size: 12px;
+  line-height: 1;
 }

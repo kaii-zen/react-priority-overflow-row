@@ -105,6 +105,35 @@ function SplitRightRow() {
   );
 }
 
+function PackedRow() {
+  return (
+    <PriorityOverflowRow layout="packed" gap="12px" className="priority-row">
+      <PriorityOverflowRow.Group>
+        <span data-slot="date-a">date-a</span>
+      </PriorityOverflowRow.Group>
+      <PriorityOverflowRow.Group>
+        <span data-slot="date-b">date-b</span>
+      </PriorityOverflowRow.Group>
+      <PriorityOverflowRow.Group>
+        <span data-slot="drawing">drawing</span>
+      </PriorityOverflowRow.Group>
+      <PriorityOverflowRow.Group align="end">
+        <PriorityOverflowRow.Variant
+          modes={
+            [
+              { value: 'full' },
+              { value: 'short', priority: 20 },
+              { value: 'icon', priority: 80 },
+            ] as const
+          }
+        >
+          {(mode) => <span data-slot="forms">forms-{mode}</span>}
+        </PriorityOverflowRow.Variant>
+      </PriorityOverflowRow.Group>
+    </PriorityOverflowRow>
+  );
+}
+
 describe('PriorityOverflowRow', () => {
   let availableWidth = 940;
   let originalGetBoundingClientRect: typeof HTMLElement.prototype.getBoundingClientRect;
@@ -132,6 +161,12 @@ describe('PriorityOverflowRow', () => {
           'people-smallchips-shortactions-full': 340,
           'people-smallchips-shortactions-icon': 300,
           'people-smallchips-iconactions-icon': 260,
+          'date-a': 300,
+          'date-b': 120,
+          drawing: 100,
+          'forms-full': 360,
+          'forms-short': 240,
+          'forms-icon': 132,
         };
 
         if (element.classList.contains('priority-row')) {
@@ -232,6 +267,26 @@ describe('PriorityOverflowRow', () => {
         'auto',
       );
       expect(peopleLine?.style.width).toBe('100%');
+    });
+  });
+
+  it('packs later groups into partially filled wrapped lines', async () => {
+    availableWidth = 400;
+    render(<PackedRow />);
+
+    await waitFor(() => {
+      const dateALine = visibleSlot('date-a')?.parentElement?.parentElement;
+      const dateBLine = visibleSlot('date-b')?.parentElement?.parentElement;
+      const drawingLine = visibleSlot('drawing')?.parentElement?.parentElement;
+      const formsLine = visibleSlot('forms')?.parentElement?.parentElement;
+
+      expect(dateBLine).not.toBe(dateALine);
+      expect(drawingLine).toBe(dateBLine);
+      expect(formsLine).toBe(dateBLine);
+      expect(visibleSlot('forms')).toHaveTextContent('forms-icon');
+      expect(visibleSlot('forms')?.parentElement?.style.marginInlineStart).toBe(
+        'auto',
+      );
     });
   });
 });
