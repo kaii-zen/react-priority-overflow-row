@@ -183,6 +183,45 @@ function App() {
           </PriorityOverflowRow>
         </ResizableFrame>
       </section>
+
+      <section className="demo-section">
+        <h2>Packed Schedule Bar</h2>
+        <ResizableFrame example="packed-schedule-bar" initialWidth={820}>
+          <PriorityOverflowRow
+            layout="packed"
+            gap={12}
+            className="packed-schedule-bar"
+          >
+            <PriorityOverflowRow.Group>
+              <DateField icon="▶" label="Kickoff" value="2026-04-06" />
+            </PriorityOverflowRow.Group>
+            <PriorityOverflowRow.Group>
+              <DateField icon="▣" label="Internal Review" value="2026-04-13" />
+            </PriorityOverflowRow.Group>
+            <PriorityOverflowRow.Group>
+              <DateField icon="◼" label="Launch Window" value="2026-04-20" />
+            </PriorityOverflowRow.Group>
+            <PriorityOverflowRow.Group>
+              <a className="resource-link" href="#resource">
+                ⬡ Assets ready
+              </a>
+            </PriorityOverflowRow.Group>
+            <PriorityOverflowRow.Group align="end">
+              <PriorityOverflowRow.Variant
+                modes={
+                  [
+                    { value: 'full' },
+                    { value: 'short', priority: 40 },
+                    { value: 'icon', priority: 80 },
+                  ] as const
+                }
+              >
+                {(mode) => <WorkflowButtons mode={mode} />}
+              </PriorityOverflowRow.Variant>
+            </PriorityOverflowRow.Group>
+          </PriorityOverflowRow>
+        </ResizableFrame>
+      </section>
     </main>
   );
 }
@@ -343,6 +382,87 @@ function ToolButton({
       <span>{icon}</span>
       {text ? <span>{text}</span> : null}
     </button>
+  );
+}
+
+function DateField({
+  icon,
+  label,
+  value,
+}: {
+  icon: string;
+  label: string;
+  value: string;
+}) {
+  return (
+    <label className="date-field">
+      <span>{label}</span>
+      <strong>
+        <span>{icon}</span>
+        {value}
+        <span>▣</span>
+      </strong>
+    </label>
+  );
+}
+
+function WorkflowButtons({ mode }: { mode: FilterMode }) {
+  return (
+    <div className="workflow-buttons">
+      <WorkflowButton
+        mode={mode}
+        icon="☑"
+        label="Requirements Review"
+        shortLabel="Req."
+        count={0}
+      />
+      <WorkflowButton
+        mode={mode}
+        icon="◉"
+        label="Prototype Check"
+        shortLabel="Proto"
+        count={0}
+      />
+      <WorkflowButton
+        mode={mode}
+        icon="▤"
+        label="Release Notes"
+        shortLabel="Notes"
+        count={1}
+      />
+    </div>
+  );
+}
+
+function WorkflowButton({
+  count,
+  icon,
+  label,
+  mode,
+  shortLabel,
+}: {
+  count: number;
+  icon: string;
+  label: string;
+  mode: FilterMode;
+  shortLabel: string;
+}) {
+  const text = mode === 'icon' ? null : mode === 'short' ? shortLabel : label;
+
+  return (
+    <a
+      className={`workflow-button ${mode === 'icon' ? 'workflow-button-icon' : ''}`}
+      href="#workflow"
+      aria-label={label}
+    >
+      <span>{icon}</span>
+      {text ? <span>{text}</span> : null}
+      {mode === 'icon' ? (
+        <span className="workflow-button-badge">{count}</span>
+      ) : (
+        <span className="workflow-button-count">{count}</span>
+      )}
+    </a>
   );
 }
 
