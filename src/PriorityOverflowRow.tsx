@@ -14,6 +14,7 @@ import {
 import useMeasure from 'react-use-measure';
 import {
   buildPriorityOverflowGroupStates,
+  selectPackedPriorityOverflowLayout,
   selectPriorityOverflowLayout,
   type PriorityOverflowGroupDefinition,
   type PriorityOverflowGroupState,
@@ -22,6 +23,7 @@ import {
 } from './priority-overflow-row';
 
 export type PriorityOverflowGap = number | string;
+export type PriorityOverflowLayoutStrategy = 'ordered' | 'packed';
 
 export type PriorityOverflowRowProps = {
   /**
@@ -29,6 +31,12 @@ export type PriorityOverflowRowProps = {
    * CSS pixels. Strings are passed through as CSS values.
    */
   gap?: PriorityOverflowGap;
+  /**
+   * Layout strategy used to place groups. `ordered` preserves the original
+   * first-line-plus-wrapped-groups behavior. `packed` fills wrapped lines with
+   * later groups when they fit.
+   */
+  layout?: PriorityOverflowLayoutStrategy;
   /**
    * Row content. Place each coordinated cluster in a
    * `PriorityOverflowRow.Group`.
@@ -59,7 +67,7 @@ export type PriorityOverflowGroupProps = {
    * Priority cost for moving this group to a new line. Lower values wrap
    * earlier. Omit this prop for groups that should not wrap independently.
    */
-  wrapPriority?: number;
+  wrapPriority?: number | false;
   /**
    * Fixed children and `PriorityOverflowRow.Variant` children rendered in this
    * group.
@@ -185,6 +193,7 @@ function GapMeasurement({ gap, onResize }: GapMeasurementProps) {
 
 function PriorityOverflowRowRoot({
   gap = 0,
+  layout: layoutStrategy = 'ordered',
   children,
   className,
   style,
@@ -213,6 +222,7 @@ function PriorityOverflowRowRoot({
     groups.map((group, groupIndex) => ({
       groupIndex,
       wrapPriority: group.wrapPriority,
+      layoutStrategy,
       variants: group.variants,
     })),
   );
@@ -261,7 +271,11 @@ function PriorityOverflowRowRoot({
       variants: group.variants,
     }),
   );
-  const layout = selectPriorityOverflowLayout({
+  const selectLayout =
+    layoutStrategy === 'packed'
+      ? selectPackedPriorityOverflowLayout
+      : selectPriorityOverflowLayout;
+  const layout = selectLayout({
     availableWidth,
     gapWidth: gapWidth || cssPixels(rowGap),
     groups: groupDefinitions,

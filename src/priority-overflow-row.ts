@@ -12,7 +12,7 @@ export type PriorityOverflowVariantDefinition = {
 };
 
 export type PriorityOverflowGroupDefinition = {
-  wrapPriority?: number;
+  wrapPriority?: number | false;
   variants: readonly PriorityOverflowVariantDefinition[];
 };
 
@@ -154,6 +154,97 @@ export function selectPriorityOverflowLayout({
   return layoutFromState(groupStateIndexes, wrappedGroups);
 }
 
+export function selectPackedPriorityOverflowLayout({
+  availableWidth,
+  gapWidth,
+  groups,
+  groupStates,
+  groupWidths,
+}: SelectPriorityOverflowLayoutOptions): PriorityOverflowLayout {
+  const groupStateIndexes = groups.map(() => 0);
+  const explicitLineBreaks = new Set<number>();
+
+  if (
+    availableWidth <= 0 ||
+    groupWidths.length !== groups.length ||
+    groupWidths.some((widths, groupIndex) =>
+      groupStates[groupIndex].some(
+        (_, stateIndex) => widths[stateIndex] === undefined,
+      ),
+    )
+  ) {
+    const lines = packedLinesFromState({
+      availableWidth,
+      explicitLineBreaks,
+      gapWidth,
+      groups,
+      groupStateIndexes,
+      groupWidths,
+    });
+
+    return {
+      groupStateIndexes,
+      lineBreaks: lineBreaksFromLines(lines),
+      lines,
+    };
+  }
+
+  const maxIterations =
+    groups.length +
+    groupStates.reduce((total, states) => total + states.length, 0) *
+      Math.max(groups.length, 1);
+
+  for (let iteration = 0; iteration < maxIterations; iteration += 1) {
+    const action = nextPackedPriorityOverflowAction({
+      availableWidth,
+      explicitLineBreaks,
+      gapWidth,
+      groups,
+      groupStateIndexes,
+      groupStates,
+      groupWidths,
+    });
+
+    if (!action) {
+      const lines = packedLinesFromState({
+        availableWidth,
+        explicitLineBreaks,
+        gapWidth,
+        groups,
+        groupStateIndexes,
+        groupWidths,
+      });
+
+      return {
+        groupStateIndexes,
+        lineBreaks: lineBreaksFromLines(lines),
+        lines,
+      };
+    }
+
+    if (action.kind === 'compact') {
+      groupStateIndexes[action.groupIndex] += 1;
+    } else {
+      explicitLineBreaks.add(action.groupIndex);
+    }
+  }
+
+  const lines = packedLinesFromState({
+    availableWidth,
+    explicitLineBreaks,
+    gapWidth,
+    groups,
+    groupStateIndexes,
+    groupWidths,
+  });
+
+  return {
+    groupStateIndexes,
+    lineBreaks: lineBreaksFromLines(lines),
+    lines,
+  };
+}
+
 function nextPriorityOverflowAction(
   overflowingLines: readonly (readonly number[])[],
   groups: readonly PriorityOverflowGroupDefinition[],
@@ -179,7 +270,11 @@ function nextPriorityOverflowAction(
       if (lineIndex > 0) {
         const { wrapPriority } = groups[groupIndex];
 
-        if (wrapPriority !== undefined && !wrappedGroups.has(groupIndex)) {
+        if (
+          wrapPriority !== undefined &&
+          wrapPriority !== false &&
+          !wrappedGroups.has(groupIndex)
+        ) {
           actions.push({
             kind: 'wrap',
             groupIndex,
@@ -190,17 +285,134 @@ function nextPriorityOverflowAction(
     });
   });
 
-  return actions.sort((left, right) => {
-    if (left.priority !== right.priority) {
-      return left.priority - right.priority;
+  return actions.sort(priorityOverflowActionSort)[0];
+}
+
+function nextPackedPriorityOverflowAction({
+  availableWidth,
+  explicitLineBreaks,
+  gapWidth,
+  groups,
+  groupStateIndexes,
+  groupStates,
+  groupWidths,
+}: {
+  availableWidth: number;
+  explicitLineBreaks: ReadonlySet<number>;
+  gapWidth: number;
+  groups: readonly PriorityOverflowGroupDefinition[];
+  groupStateIndexes: readonly number[];
+  groupStates: readonly (readonly PriorityOverflowGroupState[])[];
+  groupWidths: readonly (readonly (number | undefined)[])[];
+}): PriorityOverflowAction | undefined {
+  let currentLine: number[] = [];
+  let currentLineWidth = 0;
+
+  for (let groupIndex = 0; groupIndex < groups.length; groupIndex += 1) {
+    const groupWidth = groupWidthForState(
+      groupIndex,
+      groupStateIndexes,
+      groupWidths,
+    );
+
+    if (explicitLineBreaks.has(groupIndex) && currentLine.length > 0) {
+      currentLine = [];
+      currentLineWidth = 0;
     }
 
-    if (left.kind !== right.kind) {
-      return left.kind === 'compact' ? -1 : 1;
+    if (currentLine.length === 0) {
+      currentLine = [groupIndex];
+      currentLineWidth = groupWidth;
+      continue;
     }
 
-    return left.groupIndex - right.groupIndex;
-  })[0];
+    const nextLineWidth = currentLineWidth + gapWidth + groupWidth;
+
+    if (nextLineWidth <= availableWidth) {
+      currentLine.push(groupIndex);
+      currentLineWidth = nextLineWidth;
+      continue;
+    }
+
+    const action = nextPackedLineAction({
+      candidateGroupIndex: groupIndex,
+      currentLine,
+      explicitLineBreaks,
+      groups,
+      groupStateIndexes,
+      groupStates,
+    });
+
+    if (action) {
+      return action;
+    }
+
+    currentLine.push(groupIndex);
+    currentLineWidth = nextLineWidth;
+  }
+
+  return undefined;
+}
+
+function nextPackedLineAction({
+  candidateGroupIndex,
+  currentLine,
+  explicitLineBreaks,
+  groups,
+  groupStateIndexes,
+  groupStates,
+}: {
+  candidateGroupIndex: number;
+  currentLine: readonly number[];
+  explicitLineBreaks: ReadonlySet<number>;
+  groups: readonly PriorityOverflowGroupDefinition[];
+  groupStateIndexes: readonly number[];
+  groupStates: readonly (readonly PriorityOverflowGroupState[])[];
+}): PriorityOverflowAction | undefined {
+  const actions: PriorityOverflowAction[] = [];
+
+  [...currentLine, candidateGroupIndex].forEach((groupIndex) => {
+    const nextGroupState =
+      groupStates[groupIndex][groupStateIndexes[groupIndex] + 1];
+
+    if (nextGroupState?.priority !== undefined) {
+      actions.push({
+        kind: 'compact',
+        groupIndex,
+        priority: nextGroupState.priority,
+      });
+    }
+  });
+
+  const wrapPriority = packedWrapPriority(groups[candidateGroupIndex]);
+
+  if (
+    wrapPriority !== undefined &&
+    !explicitLineBreaks.has(candidateGroupIndex)
+  ) {
+    actions.push({
+      kind: 'wrap',
+      groupIndex: candidateGroupIndex,
+      priority: wrapPriority,
+    });
+  }
+
+  return actions.sort(priorityOverflowActionSort)[0];
+}
+
+function priorityOverflowActionSort(
+  left: PriorityOverflowAction,
+  right: PriorityOverflowAction,
+) {
+  if (left.priority !== right.priority) {
+    return left.priority - right.priority;
+  }
+
+  if (left.kind !== right.kind) {
+    return left.kind === 'compact' ? -1 : 1;
+  }
+
+  return left.groupIndex - right.groupIndex;
 }
 
 function layoutFromState(
@@ -232,6 +444,85 @@ function linesFromWrappedGroups(
   return unwrappedLine.length > 0
     ? [unwrappedLine, ...wrappedLines]
     : wrappedLines;
+}
+
+function packedLinesFromState({
+  availableWidth,
+  explicitLineBreaks,
+  gapWidth,
+  groups,
+  groupStateIndexes,
+  groupWidths,
+}: {
+  availableWidth: number;
+  explicitLineBreaks: ReadonlySet<number>;
+  gapWidth: number;
+  groups: readonly PriorityOverflowGroupDefinition[];
+  groupStateIndexes: readonly number[];
+  groupWidths: readonly (readonly (number | undefined)[])[];
+}) {
+  const lines: number[][] = [];
+  let currentLine: number[] = [];
+  let currentLineWidth = 0;
+
+  for (let groupIndex = 0; groupIndex < groups.length; groupIndex += 1) {
+    const groupWidth = groupWidthForState(
+      groupIndex,
+      groupStateIndexes,
+      groupWidths,
+    );
+    const nextLineWidth =
+      currentLine.length === 0
+        ? groupWidth
+        : currentLineWidth + gapWidth + groupWidth;
+    const canStartPackedLine =
+      currentLine.length > 0 &&
+      packedWrapPriority(groups[groupIndex]) !== undefined &&
+      nextLineWidth > availableWidth;
+    const startsExplicitLine =
+      currentLine.length > 0 && explicitLineBreaks.has(groupIndex);
+
+    if (startsExplicitLine || canStartPackedLine) {
+      lines.push(currentLine);
+      currentLine = [];
+      currentLineWidth = 0;
+    }
+
+    currentLine.push(groupIndex);
+    currentLineWidth =
+      currentLine.length === 1
+        ? groupWidth
+        : currentLineWidth + gapWidth + groupWidth;
+  }
+
+  if (currentLine.length > 0) {
+    lines.push(currentLine);
+  }
+
+  return lines;
+}
+
+function groupWidthForState(
+  groupIndex: number,
+  groupStateIndexes: readonly number[],
+  groupWidths: readonly (readonly (number | undefined)[])[],
+) {
+  return groupWidths[groupIndex][groupStateIndexes[groupIndex]] ?? 0;
+}
+
+function packedWrapPriority(group: PriorityOverflowGroupDefinition) {
+  if (group.wrapPriority === false) {
+    return undefined;
+  }
+
+  return group.wrapPriority ?? 100;
+}
+
+function lineBreaksFromLines(lines: readonly (readonly number[])[]) {
+  return lines
+    .slice(1)
+    .map((line) => line[0])
+    .filter((groupIndex) => groupIndex !== undefined);
 }
 
 function lineWidth(

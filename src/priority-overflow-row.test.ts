@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildPriorityOverflowGroupStates,
+  selectPackedPriorityOverflowLayout,
   selectPriorityOverflowLayout,
   type PriorityOverflowGroupDefinition,
 } from './priority-overflow-row';
@@ -285,5 +286,135 @@ describe('selectPriorityOverflowLayout', () => {
 
     expect(splitRightLayout.lines).toEqual([[0, 2], [1]]);
     expect(splitRightLayout.groupStateIndexes).toEqual([1, 1, 0]);
+  });
+});
+
+describe('selectPackedPriorityOverflowLayout', () => {
+  it('fills wrapped lines with later groups when they fit', () => {
+    const packedGroups = [
+      { variants: [] },
+      { variants: [] },
+      { variants: [] },
+      { variants: [] },
+    ] as const satisfies readonly PriorityOverflowGroupDefinition[];
+    const packedGroupStates = packedGroups.map((group) =>
+      buildPriorityOverflowGroupStates(group),
+    );
+
+    const layout = selectPackedPriorityOverflowLayout({
+      availableWidth: 400,
+      gapWidth: 10,
+      groups: packedGroups,
+      groupStates: packedGroupStates,
+      groupWidths: [[260], [260], [120], [120]],
+    });
+
+    expect(layout.lines).toEqual([[0], [1, 2], [3]]);
+    expect(layout.lineBreaks).toEqual([1, 3]);
+  });
+
+  it('compacts a candidate line before wrapping when compaction is cheaper', () => {
+    const packedGroups = [
+      {
+        variants: [
+          {
+            id: 'date',
+            modes: [{ value: 'full' }, { value: 'compact', priority: 10 }],
+          },
+        ],
+      },
+      { variants: [] },
+    ] as const satisfies readonly PriorityOverflowGroupDefinition[];
+    const packedGroupStates = packedGroups.map((group) =>
+      buildPriorityOverflowGroupStates(group),
+    );
+
+    const layout = selectPackedPriorityOverflowLayout({
+      availableWidth: 400,
+      gapWidth: 10,
+      groups: packedGroups,
+      groupStates: packedGroupStates,
+      groupWidths: [[240, 120], [200]],
+    });
+
+    expect(layout.lines).toEqual([[0, 1]]);
+    expect(layout.groupStateIndexes).toEqual([1, 0]);
+  });
+
+  it('wraps before further compaction when wrapping is cheaper', () => {
+    const packedGroups = [
+      {
+        variants: [
+          {
+            id: 'date',
+            modes: [{ value: 'full' }, { value: 'compact', priority: 80 }],
+          },
+        ],
+      },
+      { wrapPriority: 20, variants: [] },
+    ] as const satisfies readonly PriorityOverflowGroupDefinition[];
+    const packedGroupStates = packedGroups.map((group) =>
+      buildPriorityOverflowGroupStates(group),
+    );
+
+    const layout = selectPackedPriorityOverflowLayout({
+      availableWidth: 400,
+      gapWidth: 10,
+      groups: packedGroups,
+      groupStates: packedGroupStates,
+      groupWidths: [[240, 120], [200]],
+    });
+
+    expect(layout.lines).toEqual([[0], [1]]);
+    expect(layout.groupStateIndexes).toEqual([0, 0]);
+  });
+
+  it('uses a default wrap priority for groups without wrapPriority', () => {
+    const packedGroups = [
+      {
+        variants: [
+          {
+            id: 'date',
+            modes: [{ value: 'full' }, { value: 'compact', priority: 120 }],
+          },
+        ],
+      },
+      { variants: [] },
+    ] as const satisfies readonly PriorityOverflowGroupDefinition[];
+    const packedGroupStates = packedGroups.map((group) =>
+      buildPriorityOverflowGroupStates(group),
+    );
+
+    const layout = selectPackedPriorityOverflowLayout({
+      availableWidth: 400,
+      gapWidth: 10,
+      groups: packedGroups,
+      groupStates: packedGroupStates,
+      groupWidths: [[240, 120], [200]],
+    });
+
+    expect(layout.lines).toEqual([[0], [1]]);
+    expect(layout.groupStateIndexes).toEqual([0, 0]);
+  });
+
+  it('does not wrap a group with wrapPriority false', () => {
+    const packedGroups = [
+      { variants: [] },
+      { wrapPriority: false, variants: [] },
+    ] as const satisfies readonly PriorityOverflowGroupDefinition[];
+    const packedGroupStates = packedGroups.map((group) =>
+      buildPriorityOverflowGroupStates(group),
+    );
+
+    const layout = selectPackedPriorityOverflowLayout({
+      availableWidth: 400,
+      gapWidth: 10,
+      groups: packedGroups,
+      groupStates: packedGroupStates,
+      groupWidths: [[240], [200]],
+    });
+
+    expect(layout.lines).toEqual([[0, 1]]);
+    expect(layout.lineBreaks).toEqual([]);
   });
 });
