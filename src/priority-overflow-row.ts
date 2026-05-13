@@ -174,12 +174,8 @@ export function selectPackedPriorityOverflowLayout({
     )
   ) {
     const lines = packedLinesFromState({
-      availableWidth,
       explicitLineBreaks,
-      gapWidth,
       groups,
-      groupStateIndexes,
-      groupWidths,
     });
 
     return {
@@ -207,12 +203,8 @@ export function selectPackedPriorityOverflowLayout({
 
     if (!action) {
       const lines = packedLinesFromState({
-        availableWidth,
         explicitLineBreaks,
-        gapWidth,
         groups,
-        groupStateIndexes,
-        groupWidths,
       });
 
       return {
@@ -230,12 +222,8 @@ export function selectPackedPriorityOverflowLayout({
   }
 
   const lines = packedLinesFromState({
-    availableWidth,
     explicitLineBreaks,
-    gapWidth,
     groups,
-    groupStateIndexes,
-    groupWidths,
   });
 
   return {
@@ -447,52 +435,25 @@ function linesFromWrappedGroups(
 }
 
 function packedLinesFromState({
-  availableWidth,
   explicitLineBreaks,
-  gapWidth,
   groups,
-  groupStateIndexes,
-  groupWidths,
 }: {
-  availableWidth: number;
   explicitLineBreaks: ReadonlySet<number>;
-  gapWidth: number;
   groups: readonly PriorityOverflowGroupDefinition[];
-  groupStateIndexes: readonly number[];
-  groupWidths: readonly (readonly (number | undefined)[])[];
 }) {
   const lines: number[][] = [];
   let currentLine: number[] = [];
-  let currentLineWidth = 0;
 
   for (let groupIndex = 0; groupIndex < groups.length; groupIndex += 1) {
-    const groupWidth = groupWidthForState(
-      groupIndex,
-      groupStateIndexes,
-      groupWidths,
-    );
-    const nextLineWidth =
-      currentLine.length === 0
-        ? groupWidth
-        : currentLineWidth + gapWidth + groupWidth;
-    const canStartPackedLine =
-      currentLine.length > 0 &&
-      packedWrapPriority(groups[groupIndex]) !== undefined &&
-      nextLineWidth > availableWidth;
     const startsExplicitLine =
       currentLine.length > 0 && explicitLineBreaks.has(groupIndex);
 
-    if (startsExplicitLine || canStartPackedLine) {
+    if (startsExplicitLine) {
       lines.push(currentLine);
       currentLine = [];
-      currentLineWidth = 0;
     }
 
     currentLine.push(groupIndex);
-    currentLineWidth =
-      currentLine.length === 1
-        ? groupWidth
-        : currentLineWidth + gapWidth + groupWidth;
   }
 
   if (currentLine.length > 0) {
