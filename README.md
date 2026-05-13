@@ -93,6 +93,7 @@ modes from most expansive to most compact.
 | Prop | Type | Description |
 | --- | --- | --- |
 | `gap` | `number \| string` | Gap between groups and wrapped lines. Numbers are CSS pixels. |
+| `layout` | `'ordered' \| 'packed'` | Layout strategy. Defaults to `ordered`; use `packed` for dense multi-line rows that should fill wrapped lines with later groups. |
 | `children` | `ReactNode` | Use `PriorityOverflowRow.Group` children. |
 | `className` | `string` | Optional root class name. |
 | `style` | `CSSProperties` | Optional root inline style. |
@@ -103,7 +104,7 @@ modes from most expansive to most compact.
 | --- | --- | --- |
 | `align` | `'start' \| 'end'` | `end` pins the group to the end of its current line. |
 | `gap` | `number \| string` | Gap between children inside the group. Defaults to the row gap. |
-| `wrapPriority` | `number` | Cost to move the group to its own line. Omit to prevent independent wrapping. |
+| `wrapPriority` | `number \| false` | Cost to move the group to its own line. In `ordered` layout, omit to prevent independent wrapping. In `packed` layout, omit for default priority `100`; use `false` to prevent wrapping. |
 | `children` | `ReactNode` | Fixed children and `Variant` children. |
 
 ### `PriorityOverflowRow.Variant`
@@ -181,6 +182,31 @@ The numbers do not need to be contiguous. Leave room between them.
 Set `wrapPriority` on the group that may move to its own line. After wrapping,
 that line starts from expansive modes again and compacts only if its own line is
 too narrow.
+
+Use `layout="packed"` for dense multi-line toolbars where later groups should
+fill partially empty wrapped lines:
+
+```tsx
+<PriorityOverflowRow layout="packed" gap={12}>
+  <PriorityOverflowRow.Group>
+    <DateField />
+  </PriorityOverflowRow.Group>
+  <PriorityOverflowRow.Group>
+    <DrawingStatus />
+  </PriorityOverflowRow.Group>
+  <PriorityOverflowRow.Group align="end">
+    <PriorityOverflowRow.Variant
+      modes={[
+        { value: 'full' },
+        { value: 'short', priority: 20 },
+        { value: 'icon', priority: 80 },
+      ] as const}
+    >
+      {(mode) => <FormButtons mode={mode} />}
+    </PriorityOverflowRow.Variant>
+  </PriorityOverflowRow.Group>
+</PriorityOverflowRow>
+```
 
 ![Toolbar priority overflow demo](docs/assets/toolbar-priorities.gif)
 
